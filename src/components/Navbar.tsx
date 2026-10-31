@@ -14,8 +14,10 @@ import {
   Zap,
   Swords,
   Split,
-  Sparkles
+  Sparkles,
+  Briefcase
 } from 'lucide-react';
+
 
 interface NavbarProps {
   currentMode: GameMode;
@@ -50,8 +52,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'promptwars', label: 'PromptWars Arena', icon: <Swords className="w-4 h-4 text-pink-400" />, badge: 'AI Boss Battle' },
     { id: 'story', label: 'Protocol Outlier', icon: <BookOpen className="w-4 h-4" />, badge: 'Story RPG' },
     { id: 'ledger', label: 'Audit Ledger', icon: <ListOrdered className="w-4 h-4" />, badge: `${totalChoresExecuted}` },
-    { id: 'ai', label: 'Gemini Co-Pilot', icon: <Bot className="w-4 h-4 text-cyan-400" />, badge: 'AI Hub' }
+    { id: 'ai', label: 'Gemini Co-Pilot', icon: <Bot className="w-4 h-4 text-cyan-400" />, badge: 'AI Hub' },
+    { id: 'business', label: 'Pitch Deck', icon: <Briefcase className="w-4 h-4 text-emerald-400" />, badge: 'B2B SaaS' }
   ];
+
 
   return (
     <header className="w-full bg-slate-950/90 border-b border-cyan-500/30 sticky top-0 z-50 backdrop-blur-xl">

@@ -14,6 +14,9 @@ import { GeminiAiModal } from './components/GeminiAiModal';
 import { LiveChoreMirror } from './components/LiveChoreMirror';
 import { JudgeDemoModal } from './components/JudgeDemoModal';
 import { PromptWarsArena } from './components/PromptWarsArena';
+import { BusinessModelModal } from './components/BusinessModelModal';
+
+
 
 // Games & Story
 import { InboxInvaders } from './games/InboxInvaders';
@@ -236,7 +239,12 @@ export const App: React.FC = () => {
             onAddLintFixed={handleAddLintFixed}
           />
         )}
+
+        {currentMode === 'business' && (
+          <BusinessModelModal />
+        )}
       </main>
+
 
       {/* Live Background Daemon Execution Terminal (Collapsible PIP) */}
       <TerminalLog logs={logs} onClearLogs={() => setLogs([])} />
