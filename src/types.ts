@@ -1,4 +1,5 @@
-export type GameMode = 'inbox' | 'folders' | 'expenses' | 'lint' | 'story' | 'ledger' | 'ai';
+export type GameMode = 'inbox' | 'folders' | 'expenses' | 'lint' | 'story' | 'promptwars' | 'ledger' | 'ai';
+
 
 export interface ChoreItem {
   id: string;

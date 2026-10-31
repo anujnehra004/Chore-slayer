@@ -3,6 +3,7 @@ import type { GameMode, ExecutionLogEntry, PlayerStats } from './types';
 
 import { INITIAL_PLAYER_STATS, INITIAL_EMAILS_COUNT } from './engine/choreEngine';
 import { sounds } from './audio/soundEffects';
+import { voiceAnnouncer } from './voice/voiceAnnouncer';
 
 // Components
 import { Navbar } from './components/Navbar';
@@ -10,6 +11,9 @@ import { StatsBar } from './components/StatsBar';
 import { TerminalLog } from './components/TerminalLog';
 import { ActionLedger } from './components/ActionLedgerModal';
 import { GeminiAiModal } from './components/GeminiAiModal';
+import { LiveChoreMirror } from './components/LiveChoreMirror';
+import { JudgeDemoModal } from './components/JudgeDemoModal';
+import { PromptWarsArena } from './components/PromptWarsArena';
 
 // Games & Story
 import { InboxInvaders } from './games/InboxInvaders';
@@ -24,13 +28,18 @@ export const App: React.FC = () => {
   const [emailsRemaining, setEmailsRemaining] = useState<number>(INITIAL_EMAILS_COUNT);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [logs, setLogs] = useState<ExecutionLogEntry[]>([]);
+  const [isJudgeTourOpen, setIsJudgeTourOpen] = useState<boolean>(false);
+  const [showMirror, setShowMirror] = useState<boolean>(true);
 
   // Toggle sound
   const handleToggleSound = () => {
-    sounds.enabled = !soundEnabled;
-    setSoundEnabled(!soundEnabled);
-    if (!soundEnabled) {
+    const nextVal = !soundEnabled;
+    sounds.enabled = nextVal;
+    voiceAnnouncer.enabled = nextVal;
+    setSoundEnabled(nextVal);
+    if (nextVal) {
       sounds.playLaser();
+      voiceAnnouncer.speak("Audio systems online.");
     }
   };
 
@@ -39,6 +48,11 @@ export const App: React.FC = () => {
     setStats(prev => {
       const nextCombo = comboIncrement ? prev.combo + 1 : 1;
       const multiplier = Math.max(1, Math.floor(nextCombo / 3) + 1);
+
+      if (comboIncrement && (nextCombo === 3 || nextCombo === 5 || nextCombo === 10)) {
+        voiceAnnouncer.announceCombo(nextCombo);
+      }
+
       return {
         ...prev,
         score: prev.score + points * multiplier,
@@ -89,6 +103,32 @@ export const App: React.FC = () => {
     setStats(prev => ({ ...prev, lintErrorsFixed: prev.lintErrorsFixed + 1 }));
   };
 
+  // Instant Demonstration for busy judges
+  const handleInstantDemonstration = () => {
+    setEmailsRemaining(0);
+    setStats({
+      score: 15800,
+      combo: 12,
+      maxCombo: 12,
+      emailsCleaned: 5000,
+      initialEmails: 5000,
+      bytesCleaned: 520 * 1024 * 1024,
+      taxDeductionsClaimed: 1860.50,
+      unnecessarySpendCanceled: 94.00,
+      lintErrorsFixed: 5,
+      choresExecutedCount: 18,
+      procrastinationSecondsSaved: 12600
+    });
+
+    handleChoreExecuted({
+      category: 'System',
+      action: 'JUDGE_INSTANT_CLEANSE_SIMULATED',
+      details: 'Vaporized 5,000 unread emails, organized 520MB into clean ISO folders, unlocked $1,860.50 tax deductions, and green-lit 5 AST lint errors.',
+      bytesOrItemsImpacted: 5000,
+      rawCommand: 'BENCHMARK_DEMO: status=100%_CLEANSE_ACQUIRED rank=S_TIER'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#08090e] text-slate-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* Navigation Bar */}
@@ -100,10 +140,27 @@ export const App: React.FC = () => {
         soundEnabled={soundEnabled}
         onToggleSound={handleToggleSound}
         totalChoresExecuted={stats.choresExecutedCount}
+        onOpenJudgeTour={() => setIsJudgeTourOpen(true)}
+        showMirror={showMirror}
+        onToggleMirror={() => setShowMirror(!showMirror)}
       />
 
       {/* Global Real-World Stats Dashboard */}
       <StatsBar stats={stats} emailsRemaining={emailsRemaining} />
+
+      {/* Live Dual-Pane Holo-Mirror (Visual Proof of Real Chore Execution) */}
+      {showMirror && (
+        <div className="w-full max-w-7xl mx-auto px-4 mb-4">
+          <LiveChoreMirror
+            currentMode={currentMode}
+            emailsRemaining={emailsRemaining}
+            recentLogs={logs}
+            taxSavingsClaimed={stats.taxDeductionsClaimed}
+            bytesCleaned={stats.bytesCleaned}
+            lintFixedCount={stats.lintErrorsFixed}
+          />
+        </div>
+      )}
 
       {/* Main Game / Activity Viewport */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-2 flex flex-col items-center justify-start">
@@ -143,6 +200,17 @@ export const App: React.FC = () => {
           />
         )}
 
+        {currentMode === 'promptwars' && (
+          <PromptWarsArena
+            onChoreExecuted={handleChoreExecuted}
+            onScoreGain={handleScoreGain}
+            onUpdateEmailsRemaining={reducer => setEmailsRemaining(curr => reducer(curr))}
+            onAddBytesCleaned={handleAddBytesCleaned}
+            onAddTaxSavings={handleAddTaxSavings}
+            onAddLintFixed={handleAddLintFixed}
+          />
+        )}
+
         {currentMode === 'story' && (
           <StoryMode
             onChoreExecuted={handleChoreExecuted}
@@ -173,6 +241,13 @@ export const App: React.FC = () => {
       {/* Live Background Daemon Execution Terminal (Collapsible PIP) */}
       <TerminalLog logs={logs} onClearLogs={() => setLogs([])} />
 
+      {/* Judge Quick Showcase Modal */}
+      <JudgeDemoModal
+        isOpen={isJudgeTourOpen}
+        onClose={() => setIsJudgeTourOpen(false)}
+        onInstantDemonstration={handleInstantDemonstration}
+      />
+
       {/* Footer */}
       <footer className="w-full bg-slate-950 border-t border-slate-900 py-6 px-4 text-center text-xs text-slate-500 font-mono">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
@@ -183,11 +258,13 @@ export const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
-            <span>Real Background Execution Engine</span>
+            <span>Dual-Pane Holo-Mirror</span>
             <span>•</span>
-            <span>Zero Data Loss Protocol</span>
+            <span>PromptWars AI Arena</span>
             <span>•</span>
-            <span className="text-emerald-400 font-bold">Gemini AI Enhanced</span>
+            <span>Web Speech Synthesizer</span>
+            <span>•</span>
+            <span className="text-emerald-400 font-bold">Google Gemini Enhanced</span>
           </div>
         </div>
       </footer>

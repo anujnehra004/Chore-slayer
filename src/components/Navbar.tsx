@@ -11,9 +11,11 @@ import {
   BookOpen, 
   ListOrdered, 
   Bot,
-  Zap
+  Zap,
+  Swords,
+  Split,
+  Sparkles
 } from 'lucide-react';
-
 
 interface NavbarProps {
   currentMode: GameMode;
@@ -23,6 +25,9 @@ interface NavbarProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   totalChoresExecuted: number;
+  onOpenJudgeTour: () => void;
+  showMirror: boolean;
+  onToggleMirror: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -32,13 +37,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   combo,
   soundEnabled,
   onToggleSound,
-  totalChoresExecuted
+  totalChoresExecuted,
+  onOpenJudgeTour,
+  showMirror,
+  onToggleMirror
 }) => {
   const modes: { id: GameMode; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'inbox', label: 'Inbox Invaders', icon: <Mail className="w-4 h-4" />, badge: '5,000 Emails' },
     { id: 'folders', label: 'Folder Frenzy', icon: <FolderSync className="w-4 h-4" />, badge: 'Zip Sorter' },
-    { id: 'expenses', label: 'Expense Exorcist', icon: <DollarSign className="w-4 h-4" />, badge: 'Tax Deductions' },
+    { id: 'expenses', label: 'Expense Exorcist', icon: <DollarSign className="w-4 h-4" />, badge: 'Tax Write-offs' },
     { id: 'lint', label: 'Lint Samurai', icon: <Scissors className="w-4 h-4" />, badge: 'AST Cleanse' },
+    { id: 'promptwars', label: 'PromptWars Arena', icon: <Swords className="w-4 h-4 text-pink-400" />, badge: 'AI Boss Battle' },
     { id: 'story', label: 'Protocol Outlier', icon: <BookOpen className="w-4 h-4" />, badge: 'Story RPG' },
     { id: 'ledger', label: 'Audit Ledger', icon: <ListOrdered className="w-4 h-4" />, badge: `${totalChoresExecuted}` },
     { id: 'ai', label: 'Gemini Co-Pilot', icon: <Bot className="w-4 h-4 text-cyan-400" />, badge: 'AI Hub' }
@@ -58,17 +67,33 @@ export const Navbar: React.FC<NavbarProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400">
-          <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            BACKGROUND CHORE ENGINE: 100% OPERATIONAL
-          </span>
-          <span className="hidden sm:inline text-slate-500">SATA | SMC | ENACTUS</span>
+        {/* Action Pills: Judge Tour & Holo-Mirror */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={onToggleMirror}
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border transition-all ${
+              showMirror
+                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
+                : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-200'
+            }`}
+            title="Toggle Live Dual-Pane Chore Mirror"
+          >
+            <Split className="w-3 h-3" />
+            Holo-Mirror: {showMirror ? 'ON' : 'OFF'}
+          </button>
+
+          <button
+            onClick={onOpenJudgeTour}
+            className="flex items-center gap-1 px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-mono font-bold text-[11px] shadow-sm hover:scale-105 transition-all"
+          >
+            <Sparkles className="w-3 h-3 fill-current" />
+            JUDGE 60s TOUR
+          </button>
         </div>
       </div>
 
       {/* Main Bar */}
-      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => onSelectMode('inbox')}>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-pink-500 p-0.5 shadow-lg shadow-cyan-500/30">
@@ -97,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   sounds.playWhoosh();
                   onSelectMode(mode.id);
                 }}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold tracking-wide transition-all shrink-0 ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold tracking-wide transition-all shrink-0 ${
                   isActive
                     ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-400/60 shadow-lg shadow-cyan-500/20'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent'
